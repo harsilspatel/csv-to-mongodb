@@ -4,7 +4,8 @@
   "description": "A simple app that a retrives a remote CSV and imports them into mongoDB database",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "perf": "export NODE_ENV=development && node perf-testing.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/harsilspatel/csv-to-mongodb#readme",
   "dependencies": {
+    "dotenv": "^8.0.0",
     "express": "^4.16.4",
     "fast-csv": "^2.5.0",
     "mongoose": "^5.5.7",
