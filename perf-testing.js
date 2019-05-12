@@ -26,7 +26,8 @@ db.once('open', function() {
 });
 
 const PORT = process.env.PORT || 3000;
-const FILE = 'Indicators-1500.csv';
+const FILE = 'Indicators-150000.csv';
+const BATCH_SIZE = 10000;
 
 const countrySchema = new mongoose.Schema({
   CountryName: {type: String, required: true},
@@ -39,13 +40,13 @@ const countrySchema = new mongoose.Schema({
   
 const Country = mongoose.model('Country', countrySchema);
 
-// const addCountry = (attributes) => {
-//   const country = new Country(attributes);
-//   country.save(function (err, country) {
-//     if (err) return console.error(err);
-//     // console.log('added ' + country.CountryName)
-//   });
-// };
+const addCountry = (attributes) => {
+  const country = new Country(attributes);
+  country.save(function (err, country) {
+    if (err) return console.error(err);
+    // console.log('added ' + country.CountryName)
+  });
+};
 
 var perfff;
 const obs = new PerformanceObserver((items) => {
@@ -68,6 +69,10 @@ function initServer() {
 }
 
 function startReadingStream(countrySet) {
+
+  var bulk = Country.collection.initializeUnorderedBulkOp();
+  var counter = 0;
+  let push = 0;
   let i = 0;
   let j = 0;
   performance.mark('A');
@@ -79,34 +84,50 @@ function startReadingStream(countrySet) {
   csvStream
   .on('data', function(data){
     // console.log(data)
-    console.log('processing', i+j)
-    csvStream.pause();
-    if (countrySet.has(data.CountryName)) {
-      const newCountry = new Country(data);
-      newCountry.save(function (err, newCountry) {
-        if (err) return console.error(err);
-        console.log('add', ++i);
+    // console.log('processing', i+j)
+    // csvStream.pause();
+
+    if (counter == BATCH_SIZE) {
+      csvStream.pause();
+      console.log('PUSHINGGG!', ++push)
+      bulk.execute(function(err, result) {
+        if (err) console.log(err);
+        counter = 0;
+        bulk = Country.collection.initializeUnorderedBulkOp();
         csvStream.resume();
-      });
+    });
+    }
+
+    if (countrySet.has(data.CountryName)) {
+      bulk.insert(data);
+      console.log('add ', ++i);
+      counter++;
+      // csvStream.resume();
     } else {
       console.log('ignore ', ++j);
-      csvStream.resume();
+      // csvStream.resume();
     }
+
   })
   .on('end', function(){
-    console.log('doneee!');
-    // console.log(countryNames);
-    console.log('total adds' +i)
-    console.log('total ignored' + j)
-    performance.mark('B');
-    performance.measure('A to B', 'A', 'B');
-    stats.added = i;
-    stats.ignored = j;
-    let e = new Date();
-    stats.endTime = e.toGMTString();
-    stats.perf = perfff
-    console.log(stats)
-    fs.writeFile('test-' + e.toLocaleTimeString().replace(' ', '-') + '-' + FILE, JSON.stringify(stats, null, 4), (err) => {console.log(err); process.exit();});
+    bulk.execute(function(err, result) {
+      if (err) console.log(err);
+      console.log('PUSHINGGG!', ++push)
+      console.log('doneee!');
+      // console.log(countryNames);
+      console.log('total adds' +i)
+      console.log('total ignored' + j)
+      performance.mark('B');
+      performance.measure('A to B', 'A', 'B');
+      stats.added = i;
+      stats.ignored = j;
+      let e = new Date();
+      stats.endTime = e.toGMTString();
+      stats.perf = perfff
+      console.log(stats)
+      fs.writeFile('test-' + e.toLocaleTimeString().replace(' ', '-') + '-' + FILE, JSON.stringify(stats, null, 4), (err) => {console.log(err); process.exit();});
+    });
+    
   });
 
 }
