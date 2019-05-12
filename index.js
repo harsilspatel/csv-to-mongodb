@@ -4,16 +4,22 @@ const path = require('path');
 const csv = require('fast-csv');
 const express = require('express');
 const request = require('request');
-const { performance } = require('perf_hooks');
+const { PerformanceObserver, performance } = require('perf_hooks');
 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const FILE = 'Indicators.csv';
 
+const obs = new PerformanceObserver((items) => {
+  console.log('PerformanceObserver A to B',items.getEntries()[0].duration);
+  performance.clearMarks();
+});
+obs.observe({ entryTypes: ['measure'] });
 
 console.log('listening at ' + PORT);
 performance.mark('A');
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "sample-csvs", FILE));
@@ -30,9 +36,9 @@ csv.fromStream(req, {headers: true})
         countryNames.add(data.CountryName);
   })
   .on("end", function(){
-    performance.mark('B');
     console.log('doneee!');
     console.log(countryNames);
+    performance.mark('B');
     performance.measure('A to B', 'A', 'B');
     process.exit();
   });
