@@ -23,6 +23,7 @@
   "dependencies": {
     "express": "^4.16.4",
     "fast-csv": "^2.5.0",
+    "mongoose": "^5.5.7",
     "request": "^2.88.0"
   }
 }
