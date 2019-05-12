@@ -17,7 +17,10 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log('db connected');
   initServer();
-  startReadingStream();
+  Country.find({}, function (err, docs) {
+    startReadingStream(new Set(docs.map(x => x.CountryName)))
+  });
+
   // populateCountries();
 
 });
@@ -36,13 +39,13 @@ const countrySchema = new mongoose.Schema({
   
 const Country = mongoose.model('Country', countrySchema);
 
-const addCountry = (attributes) => {
-  const country = new Country(attributes);
-  country.save(function (err, country) {
-    if (err) return console.error(err);
-    // console.log('added ' + country.CountryName)
-  });
-};
+// const addCountry = (attributes) => {
+//   const country = new Country(attributes);
+//   country.save(function (err, country) {
+//     if (err) return console.error(err);
+//     // console.log('added ' + country.CountryName)
+//   });
+// };
 
 var perfff;
 const obs = new PerformanceObserver((items) => {
@@ -64,7 +67,7 @@ function initServer() {
   app.listen(PORT)
 }
 
-function startReadingStream() {
+function startReadingStream(countrySet) {
   let i = 0;
   let j = 0;
   performance.mark('A');
@@ -78,15 +81,17 @@ function startReadingStream() {
     // console.log(data)
     console.log('processing', i+j)
     csvStream.pause();
-    Country.findOne({ CountryName: data.CountryName }, function (err, country) {
-      if (country) {
-        addCountry(data);
-        console.log('add', i++)
-      } else {
-        console.log('ignore ' + j++);
-      }
+    if (countrySet.has(data.CountryName)) {
+      const newCountry = new Country(data);
+      newCountry.save(function (err, newCountry) {
+        if (err) return console.error(err);
+        console.log('add', ++i);
+        csvStream.resume();
+      });
+    } else {
+      console.log('ignore ', ++j);
       csvStream.resume();
-    }); 
+    }
   })
   .on('end', function(){
     console.log('doneee!');
