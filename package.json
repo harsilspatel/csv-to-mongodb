@@ -1,0 +1,28 @@
+{
+  "name": "csv-to-mongodb",
+  "version": "0.0.1",
+  "description": "A simple app that a retrives a remote CSV and imports them into mongoDB database",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harsilspatel/csv-to-mongodb.git"
+  },
+  "keywords": [
+    "csv",
+    "mongoDB"
+  ],
+  "author": "harsilspatel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/harsilspatel/csv-to-mongodb/issues"
+  },
+  "homepage": "https://github.com/harsilspatel/csv-to-mongodb#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "fast-csv": "^2.5.0",
+    "request": "^2.88.0"
+  }
+}
