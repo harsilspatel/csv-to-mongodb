@@ -1,44 +1,78 @@
 'use strict';
 
+require('dotenv').config();
+const fs = require('fs');
 const path = require('path');
 const csv = require('fast-csv');
-const express = require('express');
 const request = require('request');
-const { PerformanceObserver, performance } = require('perf_hooks');
+const mongoose = require('mongoose');
+
+const BATCH_SIZE = 10000;
+const CSV_URL = process.env.CSV_URL;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const FILE = 'Indicators.csv';
+const Order = require('./models/Order');
+const Customer = require('./models/Customer');
 
-const obs = new PerformanceObserver((items) => {
-  console.log('PerformanceObserver A to B',items.getEntries()[0].duration);
-  performance.clearMarks();
-});
-obs.observe({ entryTypes: ['measure'] });
-
-console.log('listening at ' + PORT);
-performance.mark('A');
-
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, "sample-csvs", FILE));
-});
-app.listen(PORT)
-
-var countryNames = new Set();
-const req = request.get('http://localhost:' + PORT);
-
-var i = 0
-csv.fromStream(req, {headers: true})
-  .on("data", function(data){
-        console.log(i++);
-        countryNames.add(data.CountryName);
-  })
-  .on("end", function(){
-    console.log('doneee!');
-    console.log(countryNames);
-    performance.mark('B');
-    performance.measure('A to B', 'A', 'B');
-    process.exit();
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', () => {
+  console.log('db connected');
+  Customer.find({}, function (err, customers) {
+    if (err) throw err;
+    streamCSV(new Set(customers.map(c => c.customerId)))
   });
+
+});
+
+function streamCSV(customerIdSet) {
+  console.log(CSV_URL);
+  var i = 0;
+  var counter = 0;
+  var totalInserted = 0;
+  var bulkOrder = Order.collection.initializeUnorderedBulkOp();
+
+  const req = request.get(CSV_URL);
+  const csvStream = csv.fromStream(req, {headers: true});
+  csvStream
+    .on('data', (order) => {
+      console.log('processing', ++i);
+      if (customerIdSet.has(order.CountryName)) {
+        counter++;
+        console.log('add', i)
+        bulkOrder.insert({
+          orderId: order.CountryCode + i,
+          customerId: order.CountryName,
+          item: order.IndicatorCode,
+          quantity: order.Year
+      })};
+
+      if (counter === BATCH_SIZE) {
+        csvStream.pause();
+        console.log('uploading...');
+        bulkOrder.execute((err, result) => {
+          if (err) throw err;
+          totalInserted += counter;
+          counter = 0;
+          bulkOrder = Order.collection.initializeUnorderedBulkOp();
+          csvStream.resume();
+        });
+      }
+    })
+    .on('end', function(){
+      if (counter) {
+        console.log('uploading...');
+        bulkOrder.execute(function(err, result) {
+          if (err) throw err;
+          totalInserted += counter;
+          console.log('a total of', totalInserted,'entries inserted')
+          process.exit();
+        });
+      } else {
+        console.log('a total of', totalInserted,'entries inserted')
+        process.exit();
+      }
+  });
+}
