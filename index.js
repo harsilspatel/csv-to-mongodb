@@ -12,6 +12,7 @@ const ArgumentParser = require('argparse').ArgumentParser;
 const args = getArgs();
 const CSV_URL = args.csv_url;
 const BATCH_SIZE = args.batch_size;
+const RESUME_FROM = args.resume_from;
 
 // priority will be given if passing via console
 const MONGODB_URI = args.mongo_uri || process.env.MONGODB_URI;
@@ -47,33 +48,36 @@ function streamCSV(customerIdSet) {
   const csvStream = csv.fromStream(req, { headers: true });
   csvStream
     .on('data', order => {
-      console.log('processing line', ++i);
+      i++
+      if (i >= RESUME_FROM) {
+        console.log('processing line', i);
+          // we only insert the order if the customerId is in the database.
+        if (customerIdSet.has(order.CountryName)) {
+          bulkOrder.insert({
+            orderId: order.CountryCode + i,
+            customerId: order.CountryName,
+            item: order.IndicatorCode,
+            quantity: order.Year
+          });
+          console.log('add ', i);
+          counter++;
+        }
 
-      // we only insert the order if the customerId is in the database.
-      if (customerIdSet.has(order.CountryName)) {
-        bulkOrder.insert({
-          orderId: order.CountryCode + i,
-          customerId: order.CountryName,
-          item: order.IndicatorCode,
-          quantity: order.Year
-        });
-        console.log('add ', i);
-        counter++;
+        // if 'BATCH_SIZE' number of elements are inserted in bulkOrder
+        // then push them all to the database and update counters.
+        if (counter == BATCH_SIZE) {
+          csvStream.pause();
+          console.log('PUSHINGGG!', counter);
+          bulkOrder.execute(function(err, result) {
+            if (err) console.log(err);
+            totalInserted += counter;
+            counter = 0;
+            bulkOrder = Order.collection.initializeUnorderedBulkOp();
+            csvStream.resume();
+          });
+        }
       }
 
-      // if 'BATCH_SIZE' number of elements are inserted in bulkOrder
-      // then push them all to the database and update counters.
-      if (counter == BATCH_SIZE) {
-        csvStream.pause();
-        console.log('PUSHINGGG!', counter);
-        bulkOrder.execute(function(err, result) {
-          if (err) console.log(err);
-          totalInserted += counter;
-          counter = 0;
-          bulkOrder = Order.collection.initializeUnorderedBulkOp();
-          csvStream.resume();
-        });
-      }
     })
     .on('end', function() {
       // process any operations that are presernt in the bulkOrder
@@ -107,6 +111,10 @@ function getArgs() {
     help: 'batch size for inserting values in mongo database'
   });
   parser.addArgument(['-m', '--mongo-uri'], {
+    help: 'uri to connect to mongo database'
+  });
+  parser.addArgument(['-r', '--resume-from'], {
+    defaultValue: 0,
     help: 'uri to connect to mongo database'
   });
   return parser.parseArgs();
