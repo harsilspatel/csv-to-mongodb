@@ -1,16 +1,17 @@
+#!/usr/bin/env node
+
 'use strict';
 
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
 const csv = require('fast-csv');
 const request = require('request');
 const mongoose = require('mongoose');
+const ArgumentParser = require('argparse').ArgumentParser;
 
-const BATCH_SIZE = 10000;
-const CSV_URL = process.env.CSV_URL;
-const MONGODB_URI = process.env.MONGODB_URI;
-
+const args = getArgs();
+const CSV_URL = args.csv_url;
+const BATCH_SIZE = args.batch_size;
+const MONGODB_URI = args.mongo_uri || process.env.MONGODB_URI;
 
 const Order = require('./models/Order');
 const Customer = require('./models/Customer');
@@ -28,42 +29,50 @@ db.once('open', () => {
 });
 
 function streamCSV(customerIdSet) {
+  console.log(BATCH_SIZE);
   console.log(CSV_URL);
   var i = 0;
+  var j = 0;
   var counter = 0;
   var totalInserted = 0;
   var bulkOrder = Order.collection.initializeUnorderedBulkOp();
 
   const req = request.get(CSV_URL);
+
+
+  req.on('error', function(err) {
+    console.error(err);
+  })
   const csvStream = csv.fromStream(req, {headers: true});
   csvStream
     .on('data', (order) => {
-      console.log('processing', ++i);
+      console.log('processing line', ++i);
       if (customerIdSet.has(order.CountryName)) {
-        counter++;
-        console.log('add', i)
         bulkOrder.insert({
           orderId: order.CountryCode + i,
           customerId: order.CountryName,
           item: order.IndicatorCode,
           quantity: order.Year
-      })};
+        })
+        console.log('add ', i);
+        counter++;
+      }
 
-      if (counter === BATCH_SIZE) {
+      if (counter == BATCH_SIZE) {
         csvStream.pause();
-        console.log('uploading...');
-        bulkOrder.execute((err, result) => {
-          if (err) throw err;
+        console.log('PUSHINGGG!', counter)
+        bulkOrder.execute(function(err, result) {
+          if (err) console.log(err);
           totalInserted += counter;
           counter = 0;
           bulkOrder = Order.collection.initializeUnorderedBulkOp();
           csvStream.resume();
-        });
+      });
       }
     })
     .on('end', function(){
       if (counter) {
-        console.log('uploading...');
+        console.log('PUSHINGGG!', counter)
         bulkOrder.execute(function(err, result) {
           if (err) throw err;
           totalInserted += counter;
@@ -75,4 +84,34 @@ function streamCSV(customerIdSet) {
         process.exit();
       }
   });
+}
+
+
+function getArgs() {
+  var parser = new ArgumentParser({
+    version: '0.0.1',
+    addHelp:true,
+    description: 'argparser for csv-to-mongodb app'
+  });
+  parser.addArgument(
+    [ '-c', '--csv-url' ],
+    {
+      required: true,
+      help: 'the url for the remote csv'
+    }
+  );
+  parser.addArgument(
+    [ '-b', '--batch-size' ],
+    {
+      required: true,
+      help: 'batch size for inserting values in mongo database'
+    }
+  );
+  parser.addArgument(
+    [ '-m', '--mongo-uri' ],
+    {
+      help: 'uri to connect to mongo database'
+    }
+  );
+  return parser.parseArgs();
 }

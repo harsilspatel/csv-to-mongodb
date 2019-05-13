@@ -27,7 +27,7 @@ db.once('open', function() {
 
 const PORT = process.env.PORT || 3000;
 const FILE = 'Indicators-150000.csv';
-const BATCH_SIZE = 10000;
+const BATCH_SIZE = 1000;
 
 const countrySchema = new mongoose.Schema({
   CountryName: {type: String, required: true},
@@ -84,7 +84,7 @@ function startReadingStream(countrySet) {
   csvStream
   .on('data', function(data){
     // console.log(data)
-    // console.log('processing', i+j)
+    console.log('processing', i+j)
     // csvStream.pause();
 
     if (counter == BATCH_SIZE) {
