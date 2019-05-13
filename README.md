@@ -15,7 +15,7 @@
 3. Get all values from CountryName from database and create a set -> Get obj from stream -> If obj's CountryName is one of the values in the set. insert it into the database.
 4. Get all values from CountryName from database and create a set -> Get obj from stream -> If obj's CountryName is one of the values in the set, push object into the Bulk() object (buffer) and push a batch at once.
 
-
+### Stats
 
 | Technique     | Items processed | Time (s)  | Memory | CPU | Items/second |
 | ------------- |:-------------:| -----:|-----:| -----:| -----:|
@@ -28,3 +28,9 @@
 | 4 | 15,000      |    20.102 |  135% | 2.4% | 746.226 |
 | 4 | 150,000     |    206.733 | 184% | 10% | 728.15 |
 | 4 | 15,000      |  17.929 | 41% | 2.1% | 882.35 |
+
+Please note that these tests were done on my laptop in a non isolated environment, i.e. other applications were running while the testing was being performed. However, since all the tests were performed under similar circumstances, we are assuming that the stats, such as time, will be affected by the same factor in all the tests performed.
+
+It should also be noted that the CPU consumptions were recorded when the Bulk() is being pushed, i.e. at it's peak performance. If the script is simply pushing the objects onto bulk's buffer, it does not consume more than ~2% CPU.
+
+Clearly, using bulk() is the most efficient method and thereby that's the one implemented in the application.
