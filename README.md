@@ -35,13 +35,13 @@ It should also be noted that the CPU consumptions were recorded when the Bulk() 
 
 Clearly, using bulk() is the most efficient method and thereby that's the one implemented in the application.
 
-### Usage
+## Usage
 1. Clone the repo.
 2. Run `npm install` to install dependencies.
 3. `chmod +x index.js` for execution permissions. (Or can be called using node).
 4. `./index.js {arguments}`
 
-#### CLI Arguments
+### CLI Arguments
 `-c`, `--csv-url`: the url for the remote csv (required) </br>
 `-b`, `--batch-size`: batch size for inserting values in mongo database (required) </br>
 `-m`, `--mongo-uri`: uri to connect to mongo database (can even have it in .env) </br>
