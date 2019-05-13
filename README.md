@@ -34,3 +34,16 @@ Please note that these tests were done on my laptop in a non isolated environmen
 It should also be noted that the CPU consumptions were recorded when the Bulk() is being pushed, i.e. at it's peak performance. If the script is simply pushing the objects onto bulk's buffer, it does not consume more than ~2% CPU.
 
 Clearly, using bulk() is the most efficient method and thereby that's the one implemented in the application.
+
+### Usage
+1. Clone the repo.
+2. Run `npm install` to install dependencies.
+3. `chmod +x index.js` for execution permissions. (Or can be called using node).
+4. `./index.js {arguments}`
+
+#### CLI Arguments
+`-c`, `--csv-url`: the url for the remote csv (required)
+`-b`, `--batch-size`: batch size for inserting values in mongo database (required)
+`-m`, `--mongo-uri`: uri to connect to mongo database (can even have it in .env)
+
+
