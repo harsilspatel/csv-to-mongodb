@@ -45,5 +45,7 @@ Clearly, using bulk() is the most efficient method and thereby that's the one im
 `-c`, `--csv-url`: the url for the remote csv (required) </br>
 `-b`, `--batch-size`: batch size for inserting values in mongo database (required) </br>
 `-m`, `--mongo-uri`: uri to connect to mongo database (can even have it in .env) </br>
+`-r`, `--resume-from`: line number to resume the insertion from, in case the previous attempt was interrupted </br>
+
 
 

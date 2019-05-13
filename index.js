@@ -48,10 +48,10 @@ function streamCSV(customerIdSet) {
   const csvStream = csv.fromStream(req, { headers: true });
   csvStream
     .on('data', order => {
-      i++
+      i++;
       if (i >= RESUME_FROM) {
         console.log('processing line', i);
-          // we only insert the order if the customerId is in the database.
+        // we only insert the order if the customerId is in the database.
         if (customerIdSet.has(order.CountryName)) {
           bulkOrder.insert({
             orderId: order.CountryCode + i,
@@ -77,7 +77,6 @@ function streamCSV(customerIdSet) {
           });
         }
       }
-
     })
     .on('end', function() {
       // process any operations that are presernt in the bulkOrder
@@ -115,7 +114,8 @@ function getArgs() {
   });
   parser.addArgument(['-r', '--resume-from'], {
     defaultValue: 0,
-    help: 'uri to connect to mongo database'
+    help:
+      'line number to resume the insertion from, in case the previous attempt was interrupted'
   });
   return parser.parseArgs();
 }
