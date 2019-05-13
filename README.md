@@ -1,5 +1,5 @@
 # csv-to-mongodb
-
+A simple batch script to import items from remote csv and insert them in mongoDB. It does so by using the streaming the csv using the [request](https://github.com/request/request#streaming) and batch inserts items using mongoDB's [bulk()](https://docs.mongodb.com/manual/reference/method/Bulk) API.
 
 ## Performance testing
 ### Setup
@@ -42,8 +42,8 @@ Clearly, using bulk() is the most efficient method and thereby that's the one im
 4. `./index.js {arguments}`
 
 #### CLI Arguments
-`-c`, `--csv-url`: the url for the remote csv (required)
-`-b`, `--batch-size`: batch size for inserting values in mongo database (required)
-`-m`, `--mongo-uri`: uri to connect to mongo database (can even have it in .env)
+`-c`, `--csv-url`: the url for the remote csv (required) </br>
+`-b`, `--batch-size`: batch size for inserting values in mongo database (required) </br>
+`-m`, `--mongo-uri`: uri to connect to mongo database (can even have it in .env) </br>
 
 
