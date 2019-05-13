@@ -19,15 +19,15 @@ A simple batch script to import items from remote csv and insert them in mongoDB
 
 | Technique     | Items processed | Time (s)  | Memory | CPU | Items/second | Links | Screenshot|
 | ------------- |:-------------:| -----:|-----:| -----:| -----:|  -----:| -----:|
-| 1 | 1,500     |    262.378 | 1.3% | 0.3% | 5.72 | [🔗](/performance-testing/test-4/11/29-AM-Indicators-1500.json) | [📸](/performance-testing/v1-1.png) |
-| 1 | 1,500     |    297.191 | 1.1% | 0.3% | 5.05 | [🔗](/performance-testing/test-5/10/02-AM-Indicators-1500.json) | [📸](/performance-testing/v1-2.png) |
-| 2 | 1,500     |    258.899 | 0.9% | 0.3% | 5.81 | [🔗](/performance-testing/test-5/17/45-AM-Indicators-1500.json) | [📸](/performance-testing/v2-1.png) |
-| 2 | 1,500     |    259.193 | 0.9% | 0.3% | 5.79 | [🔗](/performance-testing/test-5/23/40-AM-Indicators-1500.json) | [📸](/performance-testing/v2-2.png) |
-| 3 | 1,500     |    74.589 | 1.2% | 0.3% | 20.13| [🔗](/performance-testing/test-5/44/47-AM-Indicators-1500.json) | [📸](/performance-testing/v3-1.png) |
-| 3 | 1,500     |    73.902 | 2.2% | 0.3% | 20.29 | [🔗](/performance-testing/test-5/46/13-AM-Indicators-1500.json) | [📸](/performance-testing/v3-2.png) |
-| 4 | 15,000      |    20.102 |  135% | 2.4% | 746.226 | [🔗](/performance-testing/test-6/28/00-AM-Indicators-15000.json) | [📸](v4-1.png) |
-| 4 | 150,000     |    206.733 | 184% | 10% | 728.15 | [🔗](/performance-testing/test-6/37/26-AM-Indicators-150000.json) | [📸](v4-2.png) |
-| 4 | 15,000      |  17.929 | 41% | 2.1% | 882.35 | [🔗](/performance-testing/test-11/41/37-AM-Indicators-15000.json) | [📸](v4-3.png) |
+| 1 | 1,500     |    262.378 | 1.3% | 0.3% | 5.72 | [🔗](/performance-testing/test-4.11.29-AM-Indicators-1500.json) | [📸](/performance-testing/v1-1.png) |
+| 1 | 1,500     |    297.191 | 1.1% | 0.3% | 5.05 | [🔗](/performance-testing/test-5.10.02-AM-Indicators-1500.json) | [📸](/performance-testing/v1-2.png) |
+| 2 | 1,500     |    258.899 | 0.9% | 0.3% | 5.81 | [🔗](/performance-testing/test-5.17.45-AM-Indicators-1500.json) | [📸](/performance-testing/v2-1.png) |
+| 2 | 1,500     |    259.193 | 0.9% | 0.3% | 5.79 | [🔗](/performance-testing/test-5.23.40-AM-Indicators-1500.json) | [📸](/performance-testing/v2-2.png) |
+| 3 | 1,500     |    74.589 | 1.2% | 0.3% | 20.13| [🔗](/performance-testing/test-5.44.47-AM-Indicators-1500.json) | [📸](/performance-testing/v3-1.png) |
+| 3 | 1,500     |    73.902 | 2.2% | 0.3% | 20.29 | [🔗](/performance-testing/test-5.46.13-AM-Indicators-1500.json) | [📸](/performance-testing/v3-2.png) |
+| 4 | 15,000      |    20.102 |  135% | 2.4% | 746.226 | [🔗](/performance-testing/test-6.28.00-AM-Indicators-15000.json) | [📸](v4-1.png) |
+| 4 | 150,000     |    206.733 | 184% | 10% | 728.15 | [🔗](/performance-testing/test-6.37.26-AM-Indicators-150000.json) | [📸](v4-2.png) |
+| 4 | 15,000      |  17.929 | 41% | 2.1% | 882.35 | [🔗](/performance-testing/test-11.41.37-AM-Indicators-15000.json) | [📸](v4-3.png) |
 
 Please note that these tests were done on my laptop in a non isolated environment, i.e. other applications were running while the testing was being performed. However, since all the tests were performed under similar circumstances, we are assuming that the stats, such as time, will be affected by the same factor in all the tests performed.
 
