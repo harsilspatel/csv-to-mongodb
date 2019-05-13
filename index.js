@@ -36,9 +36,9 @@ db.once('open', () => {
 
 function streamCSV(customerIdSet) {
   // variables for keeping count of entries processed
-  var i = 0;
-  var counter = 0;
-  var totalInserted = 0;
+  var i = 0;              // to keep count of lines
+  var counter = 0;        // to keep count of values in the bulk()
+  var totalInserted = 0;  // to keep track of total items inserted
   var bulkOrder = Order.collection.initializeUnorderedBulkOp();
 
   const req = request.get(CSV_URL);
@@ -52,13 +52,8 @@ function streamCSV(customerIdSet) {
       if (i >= RESUME_FROM) {
         console.log('processing line', i);
         // we only insert the order if the customerId is in the database.
-        if (customerIdSet.has(order.CountryName)) {
-          bulkOrder.insert({
-            orderId: order.CountryCode + i,
-            customerId: order.CountryName,
-            item: order.IndicatorCode,
-            quantity: order.Year
-          });
+        if (customerIdSet.has(order.customerId)) {
+          bulkOrder.insert(order);
           console.log('add ', i);
           counter++;
         }
