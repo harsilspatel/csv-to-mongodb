@@ -4,8 +4,11 @@
   "description": "A simple app that a retrives a remote CSV and imports them into mongoDB database",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "perf": "export NODE_ENV=development && node perf-testing.js"
+    "eslint": "eslint",
+    "eslint-check": "eslint --print-config . | eslint-config-prettier-check",
+    "lint-fix": "eslint --fix .",
+    "perf": "export NODE_ENV=development && node perf-testing.js",
+    "test": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -28,5 +31,13 @@
     "fast-csv": "^2.5.0",
     "mongoose": "^5.5.7",
     "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.3.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-prettier": "^3.1.0",
+    "prettier": "1.17.1"
   }
 }
