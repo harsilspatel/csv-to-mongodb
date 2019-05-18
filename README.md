@@ -1,4 +1,7 @@
 # csv-to-mongodb
+[![Build Status](https://www.travis-ci.com/harsilspatel/csv-to-mongodb.svg?token=yLgWGY7CNm621frWpHzZ&branch=master)](https://www.travis-ci.com/harsilspatel/csv-to-mongodb)
+
+</br>
 A simple batch script to import items from remote csv and insert them in mongoDB. It does so by using the streaming the csv using the [request](https://github.com/request/request#streaming) and batch inserts items using mongoDB's [bulk()](https://docs.mongodb.com/manual/reference/method/Bulk) API.
 
 ## Performance testing
