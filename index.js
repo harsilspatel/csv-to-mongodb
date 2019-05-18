@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 
-'use strict';
-
 require('dotenv').config();
 const csv = require('fast-csv');
 const request = require('request');
 const mongoose = require('mongoose');
-const ArgumentParser = require('argparse').ArgumentParser;
+const { ArgumentParser } = require('argparse');
 
 // initialising variables
 const args = getArgs();
@@ -27,7 +25,7 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
   console.log('db connected');
-  Customer.find({}, function(err, customers) {
+  Customer.find({}, (err, customers) => {
     if (err) throw err;
     // we get all the customers and create a set of their customerID
     streamCSV(new Set(customers.map(c => c.customerId)));
@@ -36,18 +34,18 @@ db.once('open', () => {
 
 function streamCSV(customerIdSet) {
   // variables for keeping count of entries processed
-  var i = 0;              // to keep count of lines
-  var counter = 0;        // to keep count of values in the bulk()
-  var totalInserted = 0;  // to keep track of total items inserted
-  var bulkOrder = Order.collection.initializeUnorderedBulkOp();
+  let i = 0; // to keep count of lines
+  let counter = 0; // to keep count of values in the bulk()
+  let totalInserted = 0; // to keep track of total items inserted
+  let bulkOrder = Order.collection.initializeUnorderedBulkOp();
 
   const req = request.get(CSV_URL);
-  req.on('error', function(err) {
+  req.on('error', (err) => {
     console.error(err);
   });
   const csvStream = csv.fromStream(req, { headers: true });
   csvStream
-    .on('data', order => {
+    .on('data', (order) => {
       i++;
       if (i >= RESUME_FROM) {
         console.log('processing line', i);
@@ -63,7 +61,7 @@ function streamCSV(customerIdSet) {
         if (counter == BATCH_SIZE) {
           csvStream.pause();
           console.log('PUSHINGGG!', counter);
-          bulkOrder.execute(function(err, result) {
+          bulkOrder.execute((err, result) => {
             if (err) console.log(err);
             totalInserted += counter;
             counter = 0;
@@ -73,11 +71,11 @@ function streamCSV(customerIdSet) {
         }
       }
     })
-    .on('end', function() {
+    .on('end', () => {
       // process any operations that are presernt in the bulkOrder
       if (counter) {
         console.log('PUSHINGGG!', counter);
-        bulkOrder.execute(function(err, result) {
+        bulkOrder.execute((err, result) => {
           if (err) throw err;
           totalInserted += counter;
           console.log('a total of', totalInserted, 'entries inserted');
@@ -91,26 +89,26 @@ function streamCSV(customerIdSet) {
 }
 
 function getArgs() {
-  var parser = new ArgumentParser({
+  const parser = new ArgumentParser({
     version: '0.0.1',
     addHelp: true,
-    description: 'argparser for csv-to-mongodb app'
+    description: 'argparser for csv-to-mongodb app',
   });
   parser.addArgument(['-c', '--csv-url'], {
     required: true,
-    help: 'the url for the remote csv'
+    help: 'the url for the remote csv',
   });
   parser.addArgument(['-b', '--batch-size'], {
     required: true,
-    help: 'batch size for inserting values in mongo database'
+    help: 'batch size for inserting values in mongo database',
   });
   parser.addArgument(['-m', '--mongo-uri'], {
-    help: 'uri to connect to mongo database'
+    help: 'uri to connect to mongo database',
   });
   parser.addArgument(['-r', '--resume-from'], {
     defaultValue: 0,
     help:
-      'line number to resume the insertion from, in case the previous attempt was interrupted'
+      'line number to resume the insertion from, in case the previous attempt was interrupted',
   });
   return parser.parseArgs();
 }

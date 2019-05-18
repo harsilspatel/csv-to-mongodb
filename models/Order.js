@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
+
 const orderSchema = new mongoose.Schema({
   orderId: {
     type: String,
     require: true,
-    unique: true
+    unique: true,
   },
   customerId: {
     type: String,
@@ -16,7 +17,7 @@ const orderSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     require: true,
-  }
+  },
 });
 const Order = mongoose.model('Order', orderSchema);
 module.exports = Order;
