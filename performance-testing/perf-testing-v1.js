@@ -1,5 +1,3 @@
-'use strict';
-
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
@@ -12,9 +10,9 @@ const { PerformanceObserver, performance } = require('perf_hooks');
 const MONGODB_URI = process.env.MONGODB_URI;
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 // console.log(MONGODB_URI)
-var db = mongoose.connection;
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
+db.once('open', () => {
   console.log('db connected');
   initServer();
   startReadingStream();
@@ -43,7 +41,7 @@ const Country = mongoose.model('Country', countrySchema);
 //   });
 // };
 
-var perfff;
+let perfff;
 const obs = new PerformanceObserver(items => {
   perfff = items.getEntries()[0].duration;
   console.log('PerformanceObserver A to B', items.getEntries()[0].duration);
@@ -59,7 +57,7 @@ function initServer() {
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'sample-csvs', FILE));
   });
-  console.log('listening at ' + PORT);
+  console.log(`listening at ${PORT}`);
   app.listen(PORT);
 }
 
@@ -68,51 +66,48 @@ function startReadingStream() {
   let j = 0;
   performance.mark('A');
 
-  let d = new Date();
-  let stats = { beginTime: d.toGMTString() };
-  const req = request.get('http://localhost:' + PORT);
+  const d = new Date();
+  const stats = { beginTime: d.toGMTString() };
+  const req = request.get(`http://localhost:${PORT}`);
   const csvStream = csv.fromStream(req, { headers: true });
   csvStream
-    .on('data', function(data) {
+    .on('data', data => {
       // console.log(data)
       console.log('processing', i + j);
       csvStream.pause();
-      Country.findOne({ CountryName: data.CountryName }, function(
-        err,
-        country
-      ) {
+      Country.findOne({ CountryName: data.CountryName }, (err, country) => {
         if (country) {
           const newCountry = new Country(data);
-          newCountry.save(function(err, newCountry) {
+          newCountry.save((err, newCountry) => {
             if (err) return console.error(err);
             console.log('add', i++);
           });
         } else {
-          console.log('ignore ' + j++);
+          console.log(`ignore ${j++}`);
         }
         csvStream.resume();
       });
     })
-    .on('end', function() {
+    .on('end', () => {
       console.log('doneee!');
       // console.log(countryNames);
-      console.log('total adds' + i);
-      console.log('total ignored' + j);
+      console.log(`total adds${i}`);
+      console.log(`total ignored${j}`);
       performance.mark('B');
       performance.measure('A to B', 'A', 'B');
       stats.added = i;
       stats.ignored = j;
-      let e = new Date();
+      const e = new Date();
       stats.endTime = e.toGMTString();
       stats.perf = perfff;
       console.log(stats);
       fs.writeFile(
-        'test-' + e.toLocaleTimeString().replace(' ', '-') + '-' + FILE,
+        `test-${e.toLocaleTimeString().replace(' ', '-')}-${FILE}`,
         JSON.stringify(stats, null, 4),
-        err => {
+        (err) => {
           console.log(err);
           process.exit();
-        }
+        },
       );
     });
 }
@@ -237,7 +232,7 @@ function populateCountries() {
     'Italy',
     'Puerto Rico'
   ];
-  for (var i = 0; i < random_countries.length; i++) {
+  for (let i = 0; i < random_countries.length; i++) {
     addCountry({ CountryName: random_countries[i] });
   }
 }
