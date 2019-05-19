@@ -5,6 +5,10 @@ const csv = require('fast-csv');
 const request = require('request');
 const mongoose = require('mongoose');
 const { ArgumentParser } = require('argparse');
+
+// importing models
+const Order = require('./models/Order');
+const Customer = require('./models/Customer');
 const DatabaseController = require('./DatabaseController');
 
 // initialising variables
@@ -16,14 +20,18 @@ const RESUME_FROM = args.resume_from;
 // priority will be given if passing via console
 const MONGODB_URI = args.mongo_uri || process.env.MONGODB_URI;
 
-// importing models
-const Order = require('./models/Order');
-const Customer = require('./models/Customer');
+
 
 const controller = new DatabaseController(MONGODB_URI, BATCH_SIZE);
-controller.connect(() => console.log('FAILED'), () => console.log('db connected'));
+controller.connect(() => console.error('failure'), () => {
+  controller.query(Customer, {}, (err, customers) => {
+    if (err) throw err;
+    // we get all the customers and create a set of their customerID
+    streamCSV(new Set(customers.map(c => c.customerId)));
+  });
+});
 
-controller.query(Customer, {}, (err, customers) => console.log(customers));
+
 
 // connecting to mongoDB
 // mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
@@ -38,7 +46,7 @@ controller.query(Customer, {}, (err, customers) => console.log(customers));
 //   });
 // });
 
-function streamCSV(customerIdSet) {
+async function streamCSV(customerIdSet) {
   // variables for keeping count of entries processed
   let i = 0; // to keep count of lines
   let counter = 0; // to keep count of values in the bulk()
@@ -57,7 +65,8 @@ function streamCSV(customerIdSet) {
         console.log('processing line', i);
         // we only insert the order if the customerId is in the database.
         if (customerIdSet.has(order.customerId)) {
-          bulkOrder.insert(order);
+          controller.insertIntoBulk(Order, order);
+          // bulkOrder.insert(order);
           counter++
           console.log('add ', counter);
         }
@@ -67,13 +76,12 @@ function streamCSV(customerIdSet) {
         if (counter == BATCH_SIZE) {
           csvStream.pause();
           console.log('PUSHINGGG!', counter);
-          bulkOrder.execute((err, result) => {
+          controller.executeBulk(Order, (err, result) => {
             if (err) console.log(err);
             totalInserted += counter;
             counter = 0;
-            bulkOrder = Order.collection.initializeUnorderedBulkOp();
             csvStream.resume();
-          });
+          })
         }
       }
     })
@@ -81,12 +89,12 @@ function streamCSV(customerIdSet) {
       // process any operations that are presernt in the bulkOrder
       if (counter) {
         console.log('PUSHINGGG!', counter);
-        bulkOrder.execute((err, result) => {
+        controller.executeBulk(Order, (err, result) => {
           if (err) throw err;
           totalInserted += counter;
           console.log('a total of', totalInserted, 'entries inserted');
           process.exit();
-        });
+        })
       } else {
         console.log('a total of', totalInserted, 'entries inserted');
         process.exit();

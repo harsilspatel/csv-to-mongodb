@@ -28,6 +28,7 @@ class DatabaseController {
   async executeBulk(model, callback) {
     if (this.bulkModelObject) {
       await this.bulkModelObject.execute(callback);
+      this.bulkModelObject = model.collection.initializeUnorderedBulkOp();
       // this.bulkModelObject = model.collection.initializeUnorderedBulkOp();
       // callback(err, docs);
     }
