@@ -6,11 +6,11 @@ const request = require('request');
 const mongoose = require('mongoose');
 
 // importing helpers
-const parser = require('./parser');
+const parser = require('./lib/parser');
 const Order = require('./models/Order');
 const Customer = require('./models/Customer');
-const CSVProcessor = require('./CSVProcessor');
-const DatabaseController = require('./DatabaseController');
+const CSVProcessor = require('./lib/CSVProcessor');
+const DatabaseController = require('./lib/DatabaseController');
 
 // initialising variables
 const args = parser.parseArgs();
