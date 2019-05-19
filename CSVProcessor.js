@@ -28,7 +28,7 @@ class CSVProcessor {
       .on('data', order => {
         this.lineCount++;
         if (this.lineCount >= this.resumeFrom) {
-          console.log(`processing line # ${this.lineCount}`);
+          console.log(`processing line #${this.lineCount}`);
 
           // we only insert the order if the customerId is in the database.
           if (customerIdSet.has(order.customerId)) {
