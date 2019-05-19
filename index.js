@@ -5,6 +5,7 @@ const csv = require('fast-csv');
 const request = require('request');
 const mongoose = require('mongoose');
 const { ArgumentParser } = require('argparse');
+const DatabaseController = require('./DatabaseController');
 
 // initialising variables
 const args = getArgs();
@@ -19,18 +20,23 @@ const MONGODB_URI = args.mongo_uri || process.env.MONGODB_URI;
 const Order = require('./models/Order');
 const Customer = require('./models/Customer');
 
+const controller = new DatabaseController(MONGODB_URI, BATCH_SIZE);
+controller.connect(() => console.log('FAILED'), () => console.log('db connected'));
+
+controller.query(Customer, {}, (err, customers) => console.log(customers));
+
 // connecting to mongoDB
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', () => {
-  console.log('db connected');
-  Customer.find({}, (err, customers) => {
-    if (err) throw err;
-    // we get all the customers and create a set of their customerID
-    streamCSV(new Set(customers.map(c => c.customerId)));
-  });
-});
+// mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
+// const db = mongoose.connection;
+// db.on('error', console.error.bind(console, 'connection error:'));
+// db.once('open', () => {
+//   console.log('db connected');
+//   Customer.find({}, (err, customers) => {
+//     if (err) throw err;
+//     // we get all the customers and create a set of their customerID
+//     streamCSV(new Set(customers.map(c => c.customerId)));
+//   });
+// });
 
 function streamCSV(customerIdSet) {
   // variables for keeping count of entries processed
@@ -52,8 +58,8 @@ function streamCSV(customerIdSet) {
         // we only insert the order if the customerId is in the database.
         if (customerIdSet.has(order.customerId)) {
           bulkOrder.insert(order);
-          console.log('add ', i);
-          counter++;
+          counter++
+          console.log('add ', counter);
         }
 
         // if 'BATCH_SIZE' number of elements are inserted in bulkOrder
