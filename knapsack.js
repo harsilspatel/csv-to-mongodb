@@ -126,7 +126,7 @@ function packAndReport(orders, weight) {
     knapCustomerIds.forEach(id => spread[id].push(result.vans.length));
   }
   // console.log(spread)
-  result.spreadVanIds = Object.values(spread).filter(arr => arr.length > 1).flat();
+  result.spreadVanIds = Array.from(new Set(Object.values(spread).filter(arr => arr.length > 1).flat()));
   return result;
 }
 

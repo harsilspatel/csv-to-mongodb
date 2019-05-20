@@ -4,6 +4,7 @@
   "description": "A simple app that a retrives a remote CSV and imports them into mongoDB database",
   "main": "index.js",
   "scripts": {
+    "ava": "ava tests/*.test.js",
     "eslint": "eslint",
     "eslint-check": "eslint --print-config . | eslint-config-prettier-check",
     "lint-fix": "eslint --fix .",
@@ -33,6 +34,7 @@
     "request": "^2.88.0"
   },
   "devDependencies": {
+    "ava": "^1.4.1",
     "eslint": "^5.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.3.0",
