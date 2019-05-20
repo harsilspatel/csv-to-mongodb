@@ -25,7 +25,7 @@ function knapsack(items, weightFn, valueFn, capacity) {
   var memo = [];
 
   if (items.length === 0) {
-    return { maxValue: 0, subset: []}
+    return { maxValue: 0, subset: [] };
   }
 
   // Filling the sub-problem solutions grid.
@@ -87,57 +87,64 @@ function knapsack(items, weightFn, valueFn, capacity) {
 
 function packAndReport(orders, weight) {
   const spread = {};
-  const result = {vans: []}
+  const result = { vans: [] };
+
+  // we group the orders by respective customerId
   const groups = groupBy(orders, x => x.customerId);
   const customerIds = Object.keys(groups);
-  // console.log(groups)
-  for (const c of customerIds) { // can be done with forEach
-    spread[c] = []
+
+  // iterate through each customer's orders and ...
+  for (const c of customerIds) {
+    // can be done with forEach
+    spread[c] = [];
     while (true) {
+      // for our customer, try and fill the van to it's max capacity i.e. till weight
+
+      // getting customer's orders and running knapsack algorithms on that
       const customerOrders = groups[c];
-      // console.log(customerOrders)
       const knap = knapsack(customerOrders, x => x.weight, () => 1, weight);
       const knapWeight = knap.subset.reduce((sum, a) => sum + a.weight, 0);
-      // console.log(knap)
       if (knapWeight === weight) {
-        groups[c] = groups[c].filter(item => !(knap.subset.includes(item)));
-        result.vans.push({orders: knap.subset.map(item => item.orderId)});
+        // if the knapsack's weight is maximum then we pack it in the van if not then break...
+
+        // popping the packed orders out of grouped orders
+        groups[c] = groups[c].filter(item => !knap.subset.includes(item));
+        result.vans.push({ orders: knap.subset.map(item => item.orderId) });
+
+        // keeping track of the spread
         spread[c].push(result.vans.length);
-        // console.log(groups[c]);
       } else {
-        // console.log('breaking')
         break;
       }
     }
-    // break;
+    // after the while loop ends, it is certain that for that customer there does not
+    // exist a subset of orders which will completely fill the van up
   }
-  // console.log(spread)
-  // console.log(groups)
+
+  // for the leftover orders, we run knapsack on them to ensure we
+  // use the minimum number of vans for delivery.
   let leftOrders = Object.values(groups).flat();
-  // console.log(leftOrders);
-  // console.log('done with for')
+
+  // while there are orders left, do...
   while (leftOrders.length) {
+    // running knapsack on the remaining orders and popping them after adding them in the van.
     const knap = knapsack(leftOrders, x => x.weight, () => 1, weight);
-    // console.log(knap);
-    leftOrders = leftOrders.filter(item => !(knap.subset.includes(item)));
-    result.vans.push({orders: knap.subset.map(item => item.orderId)});
+    leftOrders = leftOrders.filter(item => !knap.subset.includes(item));
+    result.vans.push({ orders: knap.subset.map(item => item.orderId) });
+
+    // getting their customer ids and updating spreads
     const knapCustomerIds = new Set(knap.subset.map(item => item.customerId));
-    // console.log(knapCustomerIds);
     knapCustomerIds.forEach(id => spread[id].push(result.vans.length));
   }
-  // console.log(spread)
-  result.spreadVanIds = Array.from(new Set(Object.values(spread).filter(arr => arr.length > 1).flat()));
+  // filtering those customer's orders which are 'spread' across multiple vans
+  // and ensuring the spreadVanIds has no repeated values.
+  result.spreadVanIds = Array.from(
+    new Set(
+      Object.values(spread)
+        .filter(arr => arr.length > 1)
+        .flat()
+    )
+  );
   return result;
 }
-
-// const group = groupBy(exampleOrders, x => x.customerId);
-// const k = knapsack([], x => x.weight, () => 1, WEIGHT);
-// const knapValue = k.subset.reduce((sum, a) => sum + a.weight, 0)
-// // console.log(group)
-// // console.log(k.subset);
-// // console.log(group['1'].includes(k.subset[0]));
-
-// // console.log(knapValue)
-// console.log(JSON.stringify(packAndReport(exampleOrders)));
-
 module.exports = packAndReport;
