@@ -1,4 +1,6 @@
-const packAndReport = require('./knapsack');
+import test from 'ava';
+
+const packAndReport = require('../knapsack');
 
 const testWeight = (weight, orders, byOId) =>
   orders.map(id => byOId[id]['weight']).reduce((t, a) => t + a, 0) <= weight;
@@ -34,7 +36,7 @@ const orderIdToVanId = vans => {
 
 function testKnapsack(orders, weight) {
   const result = packAndReport(orders, weight);
-  groupByOrderId = byOrderId(orders);
+  const groupByOrderId = byOrderId(orders);
   const allPassing = result.vans.every(item =>
     testWeight(weight, item.orders, groupByOrderId)
   );
@@ -153,9 +155,16 @@ const exampleOrders3 = [
   }
 ];
 
-
-testKnapsack([], 5);
-testKnapsack(exampleOrders, 5);
-testKnapsack(exampleOrders2, 4);
-testKnapsack(exampleOrders3, 1);
+test('exampleOrders', t => {
+  t.pass(testKnapsack(exampleOrders, 5));
+});
+test('exampleOrders2', t => {
+  t.pass(testKnapsack(exampleOrders2, 4));
+});
+test('corner case all ones', t => {
+  t.pass(testKnapsack(exampleOrders3, 1));
+});
+test('corner case empty list', t => {
+  t.pass(testKnapsack([], 5));
+});
 
