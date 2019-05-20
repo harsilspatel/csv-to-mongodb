@@ -1,53 +1,4 @@
 'use strict';
-// const exampleReturnValue = {
-//   vans: [
-//     {
-//       orders: ['abc', 'ghi'], // customerId 1 and 2
-//     },
-//     {
-//       orders: ['def', 'zzz'], // customerId 1 only
-//     },
-//     {
-//       orders: ['mno', 'rst'], // customerId 2 and 3
-//     },
-//   ],
-//   // 1 and 2 for customerId 1 and
-//   // 1 and 3 for customerId 2
-//   spreadVanIds: [1, 2, 3],
-// };
-
-const exampleOrders = [
-  {
-    customerId: 1,
-    orderId: 'abc',
-    weight: 2
-  },
-  {
-    customerId: 2,
-    orderId: 'ghi',
-    weight: 1
-  },
-  {
-    customerId: 1,
-    orderId: 'def',
-    weight: 4
-  },
-  {
-    customerId: 1,
-    orderId: 'zzz',
-    weight: 1
-  },
-  {
-    customerId: 2,
-    orderId: 'mno',
-    weight: 2
-  },
-  {
-    customerId: 3,
-    orderId: 'rst',
-    weight: 2
-  }
-];
 
 const WEIGHT = 5;
 
@@ -72,6 +23,10 @@ function knapsack(items, weightFn, valueFn, capacity) {
   // This is called memoization in programming.
   // The cell will store best solution objects for different capacities and selectable items.
   var memo = [];
+
+  if (items.length === 0) {
+    return { maxValue: 0, subset: []}
+  }
 
   // Filling the sub-problem solutions grid.
   for (var i = 0; i < items.length; i++) {
@@ -130,7 +85,7 @@ function knapsack(items, weightFn, valueFn, capacity) {
   }
 }
 
-function packAndReport(orders) {
+function packAndReport(orders, weight) {
   const spread = {};
   const result = {vans: []}
   const groups = groupBy(orders, x => x.customerId);
@@ -140,47 +95,49 @@ function packAndReport(orders) {
     spread[c] = []
     while (true) {
       const customerOrders = groups[c];
-      console.log(customerOrders)
-      const knap = knapsack(customerOrders, x => x.weight, () => 1, WEIGHT);
+      // console.log(customerOrders)
+      const knap = knapsack(customerOrders, x => x.weight, () => 1, weight);
       const knapWeight = knap.subset.reduce((sum, a) => sum + a.weight, 0);
-      console.log(knap)
-      if (knapWeight === WEIGHT) {
+      // console.log(knap)
+      if (knapWeight === weight) {
         groups[c] = groups[c].filter(item => !(knap.subset.includes(item)));
         result.vans.push({orders: knap.subset.map(item => item.orderId)});
         spread[c].push(result.vans.length);
-        console.log(groups[c]);
+        // console.log(groups[c]);
       } else {
-        console.log('breaking')
+        // console.log('breaking')
         break;
       }
     }
     // break;
   }
-  console.log(spread)
+  // console.log(spread)
   // console.log(groups)
   let leftOrders = Object.values(groups).flat();
-  console.log(leftOrders);
-  console.log('done with for')
+  // console.log(leftOrders);
+  // console.log('done with for')
   while (leftOrders.length) {
-    const knap = knapsack(leftOrders, x => x.weight, () => 1, WEIGHT);
-    console.log(knap);
+    const knap = knapsack(leftOrders, x => x.weight, () => 1, weight);
+    // console.log(knap);
     leftOrders = leftOrders.filter(item => !(knap.subset.includes(item)));
     result.vans.push({orders: knap.subset.map(item => item.orderId)});
     const knapCustomerIds = new Set(knap.subset.map(item => item.customerId));
     // console.log(knapCustomerIds);
     knapCustomerIds.forEach(id => spread[id].push(result.vans.length));
   }
-  console.log(spread)
+  // console.log(spread)
   result.spreadVanIds = Object.values(spread).filter(arr => arr.length > 1).flat();
   return result;
 }
 
-const group = groupBy(exampleOrders, x => x.customerId);
-const k = knapsack(group[1], x => x.weight, () => 1, WEIGHT);
-const knapValue = k.subset.reduce((sum, a) => sum + a.weight, 0)
-// console.log(group)
-// console.log(k.subset);
-// console.log(group['1'].includes(k.subset[0]));
+// const group = groupBy(exampleOrders, x => x.customerId);
+// const k = knapsack([], x => x.weight, () => 1, WEIGHT);
+// const knapValue = k.subset.reduce((sum, a) => sum + a.weight, 0)
+// // console.log(group)
+// // console.log(k.subset);
+// // console.log(group['1'].includes(k.subset[0]));
 
-// console.log(knapValue)
-console.log(JSON.stringify(packAndReport(exampleOrders)));
+// // console.log(knapValue)
+// console.log(JSON.stringify(packAndReport(exampleOrders)));
+
+module.exports = packAndReport;
