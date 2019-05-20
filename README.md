@@ -71,3 +71,11 @@ Clearly, using bulk() is the most efficient method and thereby that's the one im
 3. If at any point we cannot fill a van using that customer's order, we do NOT put them in a van. We repeat this for all customers.
 4. The leftover orders of all customers can be packed in a van, this ensures that space usage is optimised.
 
+
+#### Reflections
+Below listed are some of the things that I could've done better:
+1. Document everything by Nodejs standards
+2. Have a stricter linter (could've used [airbnb-base](https://www.npmjs.com/package/eslint-config-airbnb-base))
+3. Have tests for first challenge. Although, I have been testing it thoroughly using my [sample-csvs](https://github.com/harsilspatel/csv-to-mongodb/tree/master/sample-csvs), however, automated tests would've been good.
+4. Could've tested all functions seperately in knapsack.
+5. Knapsack could've had more functional-programming techniques. (Feel free to checkout my [ohHell](https://github.com/harsilspatel/ohHell) and [pong](https://github.com/harsilspatel/pong-breakout) to assess my functional programming skills :D)
