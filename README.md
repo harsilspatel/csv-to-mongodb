@@ -4,6 +4,19 @@
 </br>
 A simple batch script to import items from remote csv and insert them in mongoDB. It does so by using the streaming the csv using the [request](https://github.com/request/request#streaming) and batch inserts items using mongoDB's [bulk()](https://docs.mongodb.com/manual/reference/method/Bulk) API.
 
+## Development
+### Code standardization
+This project uses EditorConfig to standardize text editor configuration.
+Visit https://editorconfig.org for more information.
+
+### Linting
+This project employees ESLint to detect suspicious code in JavaScript files.
+Visit https://eslint.org for details.
+
+### Testing
+This projects uses AVA for testing.
+Visit https://github.com/avajs/ava to know more about AVA.
+
 ## Performance testing
 ### Setup
 1. World development dataset was used for testing which can be found on [Kaggle](https://www.kaggle.com/worldbank/world-development-indicators)
