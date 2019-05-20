@@ -64,4 +64,10 @@ Clearly, using bulk() is the most efficient method and thereby that's the one im
 `-r`, `--resume-from`: line number to resume the insertion from, in case the previous attempt was interrupted </br>
 
 
+## Challenge two
+### Algorithm
+1. Group orders by customerId
+2. Try to completely fill van(s) with one customer's orders.
+3. If at any point we cannot fill a van using that customer's order, we do NOT put them in a van. We repeat this for all customers.
+4. The leftover orders of all customers can be packed in a van, this ensures that space usage is optimised.
 
