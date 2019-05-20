@@ -4,7 +4,7 @@ const orderSchema = new mongoose.Schema({
   orderId: {
     type: String,
     require: true,
-    unique: false, // ideally, this should be true, however, what it was discovered that in our sample csvs there were a number of entries with same customerId and orderId causing the program to crash.
+    unique: true,
   },
   customerId: {
     type: String,
