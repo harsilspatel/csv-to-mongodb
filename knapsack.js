@@ -131,12 +131,14 @@ function knapsack(items, weightFn, valueFn, capacity) {
 }
 
 function packAndReport(orders) {
-  const result = {vans: [], spreadVanIds: []}
+  const spread = {};
+  const result = {vans: []}
   const groups = groupBy(orders, x => x.customerId);
   const customerIds = Object.keys(groups);
   // console.log(groups)
   for (const c of customerIds) { // can be done with forEach
-    while(true) {
+    spread[c] = []
+    while (true) {
       const customerOrders = groups[c];
       console.log(customerOrders)
       const knap = knapsack(customerOrders, x => x.weight, () => 1, WEIGHT);
@@ -145,6 +147,7 @@ function packAndReport(orders) {
       if (knapWeight === WEIGHT) {
         groups[c] = groups[c].filter(item => !(knap.subset.includes(item)));
         result.vans.push({orders: knap.subset.map(item => item.orderId)});
+        spread[c].push(result.vans.length);
         console.log(groups[c]);
       } else {
         console.log('breaking')
@@ -153,8 +156,23 @@ function packAndReport(orders) {
     }
     // break;
   }
-  console.log(groups)
+  console.log(spread)
+  // console.log(groups)
+  let leftOrders = Object.values(groups).flat();
+  console.log(leftOrders);
   console.log('done with for')
+  while (leftOrders.length) {
+    const knap = knapsack(leftOrders, x => x.weight, () => 1, WEIGHT);
+    console.log(knap);
+    leftOrders = leftOrders.filter(item => !(knap.subset.includes(item)));
+    result.vans.push({orders: knap.subset.map(item => item.orderId)});
+    const knapCustomerIds = new Set(knap.subset.map(item => item.customerId));
+    // console.log(knapCustomerIds);
+    knapCustomerIds.forEach(id => spread[id].push(result.vans.length));
+  }
+  console.log(spread)
+  result.spreadVanIds = Object.values(spread).filter(arr => arr.length > 1).flat();
+  return result;
 }
 
 const group = groupBy(exampleOrders, x => x.customerId);
@@ -165,4 +183,4 @@ const knapValue = k.subset.reduce((sum, a) => sum + a.weight, 0)
 // console.log(group['1'].includes(k.subset[0]));
 
 // console.log(knapValue)
-packAndReport(exampleOrders);
+console.log(JSON.stringify(packAndReport(exampleOrders)));
